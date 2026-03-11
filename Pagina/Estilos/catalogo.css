@@ -1,0 +1,73 @@
+body {
+    background-color: #f4f6f9;
+}
+
+/* Barra superior */
+.navbar-custom {
+    background-color: #ffffff;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.logo-img {
+    width: 40px;
+    height: auto;
+    margin-right: 10px;
+}
+
+/* Menú lateral */
+.sidebar {
+    background-color: #ffffff;
+    min-height: calc(100vh - 60px);
+    border-right: 1px solid #dee2e6;
+}
+
+.nav-link {
+    color: #6c757d;
+    font-weight: 500;
+    padding: 15px 20px;
+    text-align: center;
+}
+
+.nav-link i {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.nav-link.active {
+    background-color: #e9ecef;
+    color: #0d6efd;
+    border-left: 4px solid #0d6efd;
+}
+
+/* Componentes del Main */
+.search-bar {
+    border-radius: 20px;
+}
+
+.category-pill {
+    background-color: #cce5ff;
+    color: #000;
+    border-radius: 20px;
+    border: none;
+    padding: 5px 15px;
+    margin-right: 10px;
+    font-weight: 500;
+}
+
+.cart-widget {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+/* Estilos para el botón flotante / inferior */
+.btn-floating {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: bold;
+}

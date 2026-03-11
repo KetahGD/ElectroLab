@@ -1,0 +1,55 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #999;
+    border-radius: 8px;
+}
+
+.logo-img {
+    width: 60px;
+    height: auto;
+}
+
+/* Estilos para los Inputs */
+.custom-input-group .form-control {
+    border-color: #ced4da;
+    font-size: 0.9rem;
+    padding: 10px;
+}
+
+.custom-input-group .form-control:focus {
+    box-shadow: none;
+    border-color: #000;
+}
+
+.custom-input-group .input-group-text {
+    border-color: #ced4da;
+    color: #6c757d;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Link de olvido */
+.forgot-password-link {
+    font-size: 0.8rem;
+    color: #444 !important;
+}
+
+/* Botón Ingresar */
+.btn-dark {
+    background-color: #000;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+
+.btn-dark:hover {
+    background-color: #333;
+}

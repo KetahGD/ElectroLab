@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElectroLab - Dashboard Administrativo</title>
+    <link rel="icon" href="img/logo.ico" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        body { background-color: #f4f6f9; font-family: system-ui, -apple-system, sans-serif; }
+        
+        /* Navbar Superior */
+        .navbar-custom { background-color: #ffffff; border-bottom: 1px solid #dee2e6; }
+        .logo-img { width: 35px; height: auto; margin-right: 10px; }
+        
+        /* Menú Lateral */
+        .sidebar { background-color: #ffffff; min-height: calc(100vh - 65px); padding-top: 20px; border-right: 1px solid #dee2e6; }
+        .nav-item { margin-bottom: 15px; }
+        .nav-link { color: #6c757d; font-size: 0.85rem; text-align: center; font-weight: 600; padding: 10px 5px; }
+        
+        /* Iconos circulares del menú */
+        .icon-circle { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background-color: transparent; 
+            margin: 0 auto 5px auto; 
+            font-size: 1.4rem;
+            color: #adb5bd;
+            transition: all 0.3s;
+        }
+        
+        /* Estado Activo (Gris claro para el Home en el mockup) */
+        .nav-link.active { color: #495057; }
+        .nav-link.active .icon-circle { 
+            background-color: #e9ecef; 
+            color: #495057; 
+        }
+
+        /* Tarjetas de Estadísticas */
+        .stat-card {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 30px 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .stat-value { font-size: 2rem; font-weight: 600; color: #000; margin-bottom: 5px; }
+        .stat-label { font-size: 0.9rem; color: #000; font-weight: 500; }
+
+        /* Tarjeta de Tabla */
+        .table-card {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .table-title { font-size: 1.4rem; font-weight: 600; color: #000; margin-bottom: 20px; }
+        
+        /* Estilos personalizados de la tabla */
+        .table-custom th { font-weight: 600; color: #000; border-bottom: none; padding-bottom: 15px; }
+        .table-custom td { vertical-align: middle; border-bottom: none; padding: 12px 8px; color: #495057; font-weight: 500; }
+        .table-custom tbody tr:nth-of-type(odd) { background-color: #f8f9fa; border-radius: 8px; }
+        /* Truco para redondear bordes en filas striped */
+        .table-custom tbody tr td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+        .table-custom tbody tr td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom py-2 shadow-sm">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center fw-bold fs-4 text-dark" href="#">
+                <img src="img/logo.png" alt="ElectroLab Logo" class="logo-img">
+                ElectroLab
+            </a>
+            <div class="d-flex align-items-center ms-auto">
+                <div class="text-end me-2 lh-1">
+                    <small class="d-block fw-bold text-dark" style="font-size: 0.8rem;">USUARIO</small>
+                    <small class="d-block text-dark" style="font-size: 0.75rem;">BIENVENIDO ADMIN</small>
+                </div>
+                <i class="bi bi-person-circle fs-3 text-secondary"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-3 col-md-2 col-lg-1 d-md-block sidebar p-0">
+                <ul class="nav flex-column w-100">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">
+                            <div class="icon-circle"><i class="bi bi-house-door-fill"></i></div>
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#">
+                            <div class="icon-circle"><i class="bi bi-box-seam-fill"></i></div>
+                            Productos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#">
+                            <div class="icon-circle"><i class="bi bi-list-ul"></i></div>
+                            Inventario
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <main class="col-9 col-md-10 col-lg-11 ms-sm-auto px-md-5 pt-4 pb-5">
+                
+                <h3 class="fw-bold mb-4">Estadisticas</h3>
+                
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-value" id="val-ventas-hoy">$ 0.00</div>
+                            <div class="stat-label">Ventas Hoy</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-value" id="val-stock">0</div>
+                            <div class="stat-label">Productos en Stock</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-value" id="val-clientes">0</div>
+                            <div class="stat-label">Nuevos Clientes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-card">
+                            <h4 class="table-title">Últimas Ventas</h4>
+                            <div class="table-responsive">
+                                <table class="table table-borderless table-custom mt-3">
+                                    <thead>
+                                        <tr>
+                                            <th>Folio</th>
+                                            <th>Fecha</th>
+                                            <th>Cliente</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-ventas-body">
+                                        <tr>
+                                            <td>F-2024-001</td>
+                                            <td>2024-07-25</td>
+                                            <td>Juan Perez</td>
+                                            <td>$550.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>F-2024-002</td>
+                                            <td>2024-07-25</td>
+                                            <td>Maria Garcia</td>
+                                            <td>$120.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>F-2024-003</td>
+                                            <td>2024-07-24</td>
+                                            <td>Maria Garcia</td>
+                                            <td>$310.00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
