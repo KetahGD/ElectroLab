@@ -1,0 +1,174 @@
+¡Perfecto, Rolando! Con estos archivos que me enviaste ya tengo la estructura exacta de tu maestro para consumir la API mediante `cURL`.
+
+Para amarrar el **100/100 en tu rúbrica**, vamos a atacar los 4 puntos pendientes. Te entregaré los códigos respetando tu variable `$registro_encontrado`, la lectura por índices (`$registro[0]`) y el envío de objetos AJAX tal cual te lo enseñaron.
+
+Manos a la obra:
+
+### 1. Punto 9: Cumplir con los 2 `INNER JOIN`
+
+Aunque habíamos usado el estilo Oracle, la rúbrica pide explícitamente ver las palabras `INNER JOIN`. Actualiza tu archivo **`catalogo.php`** para que use los JOINs, pero mantenga la sintaxis de lectura de tu profesor:
+
+```php
+<?php
+   $registro_encontrado = 0;
+   require("conexion.php"); 
+   $datos = [];
+
+   if ( $cn->connect_errno == 0 ) {
+      
+      // Cumpliendo el Punto 9 de la rúbrica: Uso explícito de INNER JOIN
+      $sql = "SELECT p.Clave_Producto, p.Nombre, p.Precio, c.Nombre_Categoria, SUM(i.Stock) 
+              FROM Productos p
+              INNER JOIN Categorias c ON p.Codigo_Categoria = c.Codigo_Categoria
+              INNER JOIN Inventario i ON p.Clave_Producto = i.Clave_Producto
+              GROUP BY p.Clave_Producto, p.Nombre, p.Precio, c.Nombre_Categoria";
+              
+      $buscar = $cn->query($sql);
+      
+      if( $buscar ) {
+           while( $registro = $buscar->fetch_array() ) {
+                $registro_encontrado = 1;   
+                $datos[] = [
+                    'Clave_Producto' => $registro[0],
+                    'Nombre' => $registro[1],
+                    'Precio' => $registro[2],
+                    'Nombre_Categoria' => $registro[3],
+                    'StockTotal' => $registro[4]
+                ];
+           }   
+           $cn->close();    
+      }
+   }
+   header('Content-Type: application/json');
+   echo( json_encode($datos) ); 
+?>
+
+```
+
+---
+
+### 2. Punto 15: Formulario de 6 campos (Insertar)
+
+Agregaremos el campo **"Stock Inicial"**.
+En tu `GestionProductos.html`, agrega esta caja de texto dentro de tu formulario:
+
+```html
+<div class="mb-3">
+    <input type="number" id="txt_stock" class="form-control" placeholder="Stock Inicial" required>
+</div>
+
+```
+
+Ahora, actualizamos **`guardar_producto.php`** para recibir ese 6to campo y mantener la estructura:
+
+```php
+<?php
+   require("conexion.php");
+
+   // Recibimos los 6 campos (Punto 15 de la rúbrica)
+   $clave = $_POST['clave_php'];
+   $nombre = $_POST['nombre_php'];
+   $precio = floatval($_POST['precio_php']);
+   $categoria = intval($_POST['categoria_php']);
+   $descripcion = $_POST['desc_php'];
+   $stock = intval($_POST['stock_php']);
+
+   if ($cn->connect_errno == 0) {
+       $sql1 = "INSERT INTO Productos (Clave_Producto, Nombre, Precio, Codigo_Categoria, Descripcion) 
+                VALUES ('$clave', '$nombre', $precio, $categoria, '$descripcion')";
+               
+       if ($cn->query($sql1)) {
+           // Insertamos el stock inicial capturado en el 6to campo
+           $sql2 = "INSERT INTO Inventario (Clave_Producto, ID_Almacen, Stock) VALUES ('$clave', 1, $stock)";
+           $cn->query($sql2);
+           
+           $respuesta = ["status" => "success", "message" => "Producto registrado con stock."];
+       } else {
+           $respuesta = ["status" => "error", "message" => "Error al registrar el producto."];
+       }
+       $cn->close();
+   }
+
+   header('Content-Type: application/json');
+   echo json_encode($respuesta);
+?>
+
+```
+
+*(No olvides en tu `gestion_producto.js` agregar `let stock = document.getElementById('txt_stock').value;` y sumarlo a los parámetros que envías en el `xhr.send` con el nombre `&stock_php=`)*.
+
+---
+
+### 3. Punto 17: Dos actualizaciones (El segundo `UPDATE`)
+
+Ya teníamos el de inventarios. Ahora crearemos **`editar_producto.php`** para poder cambiarle el precio a un producto.
+
+```php
+<?php
+   require("conexion.php");
+
+   $clave = $_POST['clave_php'];
+   $precio = floatval($_POST['precio_php']);
+
+   if ($cn->connect_errno == 0) {
+       // Segundo UPDATE del sistema para cumplir el Punto 17
+       $sql = "UPDATE Productos SET Precio = $precio WHERE Clave_Producto = '$clave'";
+               
+       if ($cn->query($sql)) {
+           $respuesta = ["status" => "success", "message" => "Precio actualizado."];
+       } else {
+           $respuesta = ["status" => "error", "message" => "Error al actualizar."];
+       }
+       $cn->close();
+   }
+   header('Content-Type: application/json');
+   echo json_encode($respuesta);
+?>
+
+```
+
+---
+
+### 4. Punto 23: Consumir API del Dólar (El toque final)
+
+El archivo `convertir.php` que me pasaste está **perfecto**. Cópialo tal cual dentro de tu carpeta `Php`.
+
+Para que el maestro vea que sí funciona, vamos a agregar un pequeño botón en tu Dashboard Administrativo (`admin.html`) para consultar en cuánto está el dólar hoy.
+
+**A. Agrega esto en tu `admin.html`:**
+
+```html
+<div class="input-group mb-3" style="max-width: 300px;">
+    <input type="number" id="txt_valor_usd" class="form-control" placeholder="Cant. en USD" value="1">
+    <button class="btn btn-outline-success" type="button" onclick="consultarDolar()">Ver en MXN</button>
+</div>
+<h5 id="resultado_api" class="text-success fw-bold"></h5>
+
+```
+
+**B. Agrega esta función al final de tu `admin.js`:**
+Respeta exactamente la lógica que me pasaste en `scripts.js`:
+
+```javascript
+function consultarDolar() {
+    var valor = document.getElementById('txt_valor_usd').value;
+    
+    // Objeto AJAX idéntico al de tu profesor
+    let xhrApi = new XMLHttpRequest();
+    xhrApi.open('POST', 'convertir.php', true);
+    xhrApi.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhrApi.onreadystatechange = function() {
+        if(xhrApi.readyState == 4 && xhrApi.status == 200) {     
+            var json = JSON.parse(xhrApi.responseText);    
+            // Mostramos el resultado de la API en la pantalla
+            document.getElementById("resultado_api").innerText = "Equivale a: $" + parseFloat(json[0].respuesta).toFixed(2) + " MXN";
+        }
+    };
+    xhrApi.send("valor_php=" + valor);   
+}
+
+```
+
+¡Listo, Rolando! Con esto **cierras al 100% tu lista de cotejo**. Tienes los INNER JOIN, el insert de 6 campos, las 2 actualizaciones, la sintaxis numérica estricta que pidió tu maestro, y el consumo de la API Exchangerate en vivo.
+
+¡Mucho éxito en la revisión final! Si ocupas comprimirlo de alguna manera o dar un último repaso, dime.

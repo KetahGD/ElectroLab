@@ -1,0 +1,145 @@
+¡Por supuesto! Tener claro cómo funciona cada línea de tu código es fundamental para una defensa exitosa ante tus profesores. Tu proyecto está excelentemente estructurado aplicando el patrón asíncrono con `XMLHttpRequest` (AJAX puro o Vanilla JS), y cumple al pie de la letra con los ciclos y métodos que te solicitaron.
+
+Aquí tienes la documentación detallada de cada archivo JavaScript para que puedas explicar su lógica paso a paso.
+
+---
+
+### 1. `manejo_sesion.js` (Inicio de Sesión)
+
+**Propósito:** Controlar la puerta de acceso al sistema, validando credenciales y mejorando la experiencia de usuario (UI) al permitir visualizar la contraseña.
+
+* **`agregarEventos(ele, eve, fun, cap)`**: Es una función reutilizable que sirve para "escuchar" acciones del usuario (como un clic). Ayuda a mantener el código limpio en lugar de escribir `addEventListener` repetidas veces.
+* **`cargar()`**: Se ejecuta automáticamente cuando la página termina de cargar. Su trabajo es "encender" los botones, diciéndole al botón de ingresar que dispare la validación y al ícono del ojito que dispare la función de ver contraseña.
+* **`CrearObjetoAjax()`**: Es el motor del login. Captura el correo y la contraseña, instancia el objeto `XMLHttpRequest`, prepara una petición POST hacia `servidor.php` y envía los datos codificados con `encodeURIComponent` para que caracteres especiales (como un @) no rompan la petición.
+* **`esperaRespuesta()`**: Escucha la contestación de `servidor.php`. Si el estatus es `200` (éxito de conexión), usa `JSON.parse` para leer la respuesta. Si el servidor dice `"success"`, usa `window.location.href = 'home.php'` para redireccionar; si no, lanza una alerta de error.
+* **`TogglePassword()`**: Cambia dinámicamente el atributo `type` del input de la contraseña de `password` (puntos ocultos) a `text` (texto visible) y viceversa. Al mismo tiempo, alterna las clases del ícono de FontAwesome (`fa-eye` y `fa-eye-slash`).
+
+---
+
+### 2. `admin.js` (Dashboard Administrativo)
+
+**Propósito:** Alimentar el panel principal del administrador consultando las ventas recientes y calculando estadísticas clave en tiempo real.
+
+* **`cargarDashboard()`**: Inicializa una petición asíncrona por el método GET hacia `obtener_ventas_admin.php`. No envía parámetros porque su único objetivo es pedir toda la información disponible.
+* **`procesarDashboard()`**: Esta es una de las funciones clave para tu evaluación.
+* Convierte el texto recibido a un objeto JSON.
+* Declara una variable `totalVentasHoy = 0` como un acumulador.
+* **Ciclos de la rúbrica:** Utiliza un `json.forEach` para recorrer cada venta, y dentro, un `for...in` para extraer sus propiedades (claves y valores).
+* Mientras construye las filas HTML (`<tr>`), va sumando los totales de cada venta al acumulador `totalVentasHoy`.
+* Finalmente, inyecta todo el HTML de golpe en el `tbody` y actualiza la tarjeta de la estadística principal con el símbolo de moneda (`$`).
+
+
+
+---
+
+### 3. `gestion_producto.js` (CRUD de Productos)
+
+**Propósito:** Manejar el ciclo de vida completo de los componentes electrónicos (Leer, Crear y Eliminar) interactuando con tres archivos PHP distintos y usando notificaciones modernas.
+
+* **`cargarCategorias()`**: Pide las categorías a la base de datos para llenar el `<select>`. Aquí **aplicas el concepto de `DocumentFragment**` exigido en tu proyecto: en lugar de inyectar cada `<option>` al HTML uno por uno (lo cual es lento), los guardas todos en un fragmento de memoria invisible (`document.createDocumentFragment()`) y los pegas todos juntos al final.
+* **`cargarListadoProductos()`**: Consulta `obtener_listado_productos.php`. Nuevamente, utiliza la estructura `forEach` anidada con `for...in` para leer el JSON y dibujar dinámicamente la tabla de inventario.
+* **`validaDatosProducto()`**: Verifica que ninguna caja de texto requerida esté vacía usando la función `.trim()` (que elimina espacios en blanco accidentales). Devuelve `true` si todo está correcto.
+* **`guardarProductoNuevo()`**: Verifica si la validación es `true`. De ser así, manda los 5 parámetros por POST a `guardar_producto.php`. Al recibir el éxito, hace tres cosas: lanza un SweetAlert2 (`Swal.fire`), limpia el formulario (`.reset()`) y recarga la tabla llamando de nuevo a `cargarListadoProductos()`.
+* **`confirmarEliminar(id)`**: Recibe el ID del producto al que se le hizo clic. Lanza un modal de advertencia destructiva de SweetAlert. Si el usuario presiona "Sí, borrar" (`result.isConfirmed`), dispara el objeto AJAX hacia `eliminar_producto.php` y recarga la tabla.
+
+---
+
+### 4. `catalogo.js` (Vista del Cliente y Búsqueda)
+
+**Propósito:** Mostrar los productos a la venta, permitir su adición al carrito y filtrar búsquedas en tiempo real.
+
+* **`CargarCatalogo()`**: Pide la información completa a `obtener_productos.php`.
+* **`esperaRespuestaCatalogo()`**: Recibe el catálogo, itera con `forEach` y `for...in`, y construye las "Cards" de Bootstrap. Nota importante: construye dinámicamente la ruta de la imagen usando la clave del producto (`<img src="img/${producto['Clave_Producto']}.jpg">`) y tiene un evento de respaldo (`onerror`) por si la imagen no existe, mostrando un logo por defecto.
+* **`agregarAlCarrito(clave, nombre, precio)`**:
+* Utiliza el **`localStorage`** del navegador (memoria temporal). Descarga el carrito actual o crea un arreglo vacío `[]`.
+* Usa `.findIndex()` para revisar si el producto ya fue agregado antes. Si ya existe, solo le suma `+1` a la cantidad; si es nuevo, lo empuja (`.push()`) al arreglo.
+* Vuelve a guardar el arreglo actualizado en el navegador convertido en texto (`JSON.stringify`).
+* *Nota en este bloque:* También contiene un "Listener" de tipo `keyup` asignado a la barra de búsqueda (`.search-bar`). Cada vez que el cliente suelta una tecla, envía esa letra/palabra mediante AJAX a `buscar_productos.php` y redibuja las tarjetas inmediatamente para crear el **efecto de búsqueda en tiempo real** sin recargar la página.
+
+
+
+---
+
+### 5. `carrito.js` (Procesamiento de Compra)
+
+**Propósito:** Leer la memoria temporal, realizar cálculos matemáticos de la cuenta y enviar la orden consolidada a la base de datos.
+
+* **`cargarProductosCarrito()`**: Recupera el `carritoElectroLab` del `localStorage`. Si está vacío, pinta un mensaje. Si tiene productos, itera sobre ellos sumando los totales (precio * cantidad) en una variable `subtotal` y dibuja la lista.
+* **`actualizarTotales(subtotal)`**: Recibe el subtotal, le suma un costo fijo de envío ($150.00 en este caso) y actualiza los textos en el panel lateral de "Resumen del Pedido" usando `.toFixed(2)` para asegurar que siempre se muestren dos decimales.
+* **`procesarCompraAjax()`**: Captura todo el carrito en formato JSON y el total numérico. Lanza la petición a `procesar_compra.php`.
+* **`esperaRespuestaCompra()`**: Si el PHP confirma que las múltiples inserciones (Tabla Ventas y Detalle de Ventas) fueron correctas, avisa al usuario, **destruye la memoria temporal** (`localStorage.removeItem`) para vaciar el carrito, y recarga la página.
+
+---
+
+### 6. `gestion_inventario.js` (Control de Stock Físico)
+
+**Propósito:** Visualizar y permitir el ajuste de existencias físicas separadas por sucursal.
+
+* **`cargarInventario()`** y **`procesarInventario()`**: Siguen la misma lógica estricta solicitada: petición AJAX, recepción del JSON, `forEach` y `for...in`.
+* **Construcción de dos vistas:** Con una sola petición, el JavaScript aprovecha para inyectar datos en **dos tablas diferentes** al mismo tiempo:
+1. El control de sucursales (inyectando los valores en etiquetas `<input type="number">` para que el usuario pueda verlos y editarlos).
+2. El listado global que suma todo el stock cruzado de ambos almacenes.
+
+
+
+**Consejo para tu exposición:** Si un profesor te pregunta *"¿Por qué usas XMLHttpRequest en lugar del moderno Fetch API?"*, la respuesta técnica perfecta es: *"Decidimos utilizar `XMLHttpRequest` para tener un control granular sobre los estados de la petición (`readyState`), manipular manualmente las cabeceras (`setRequestHeader`) y asegurar la compatibilidad absoluta según la metodología solicitada, procesando los datos explícitamente a través de ciclos para estructurar objetos propios antes de inyectarlos en el DOM"*.
+
+---
+
+1. conexion.php (El Puente de Comunicación)
+Propósito: Es el archivo más crítico. Abre la puerta entre tu código PHP y tu base de datos MySQL.
+
+Lógica: Instancia un nuevo objeto $cn = new mysqli(...) con tus credenciales.
+
+Para tu defensa: Puedes mencionar que todos los demás archivos usan require("conexion.php"); para no tener que escribir las credenciales de la base de datos una y otra vez. Si en el futuro cambias la contraseña de tu base de datos, solo la cambias aquí y todo el sistema se actualiza.
+
+2. Archivos de Consulta (Los "SELECT")
+(Aplica para catalogo.php, gestion_inventario.php, obtener_listado_productos.php, admin.php y buscar_productos.php)
+
+Propósito: Extraer información cruzada de varias tablas y prepararla para que JavaScript la pueda dibujar.
+
+$registro_encontrado = 0;: Siguiendo la rúbrica de tus profesores, inicializas esta variable como una "bandera" lógica. Si la consulta encuentra datos, cambia a 1.
+
+El "WHERE" estilo Oracle: Si te preguntan por qué no hay INNER JOIN, explícales que utilizaste Joins Implícitos. Declaras todas las tablas juntas en el FROM (FROM Productos p, Categorias c, Inventario i) y haces la relación matemática directamente en el WHERE (p.Codigo_Categoria = c.Codigo_Categoria).
+
+$buscar->fetch_array(): Esta es la clave de tu evaluación. En lugar de extraer los datos por el nombre de la columna (ej. ['Nombre']), extraes la fila completa como un arreglo numérico.
+
+Mapeo por índices: Transcribes el arreglo numérico (ej. $registro[0], $registro[1]) a un arreglo asociativo que envuelves en un json_encode() para que viaje de forma segura hacia tu JavaScript.
+
+3. servidor.php (El Control de Acceso / Login)
+Propósito: Validar que el usuario exista en la base de datos y generar una "Sesión" segura.
+
+session_start(): Crea un espacio de memoria en el servidor exclusivo para ese usuario.
+
+Lógica: Recibe el correo y contraseña (limpios gracias al encodeURIComponent de JS). Hace un SELECT a la tabla Usuarios.
+
+Seguridad: Si encuentra coincidencia, guarda el Nombre y Correo en la variable superglobal $_SESSION. Si no lo encuentra, devuelve un JSON con el estatus "error" para que JS dispare la alerta de credenciales inválidas.
+
+4. Archivos de Inserción (Los "INSERT")
+(Aplica para guardar_producto.php y actualizar_inventario.php)
+
+Propósito: Recibir los datos de los formularios y guardarlos en la base de datos de forma relacional.
+
+Recepción de variables: Utilizas $_POST para cachar los datos. Explica que utilizas funciones como floatval() (para el precio) e intval() (para la categoría) para "sanitizar" los datos; es decir, asegurar que si la base de datos espera un número, PHP le entregue un número estricto y no un texto.
+
+Inserciones múltiples: En guardar_producto.php, haces dos sentencias SQL seguidas. Primero insertas el producto en la tabla Productos, e inmediatamente después haces un INSERT en la tabla Inventario con Stock = 0. Explícales que esto garantiza la "Integridad Referencial" de tu base de datos.
+
+5. procesar_compra.php (La joya de la corona)
+Propósito: Es el script más complejo. Recibe el carrito completo y lo desglosa en la base de datos.
+
+json_decode(): El carrito viaja desde JavaScript como una larga cadena de texto. Esta función de PHP lo vuelve a convertir en un arreglo manejable en el servidor.
+
+Generación de Folio: Creas un folio único concatenando la letra "F-" con la fecha y hora exacta del servidor date("Ymd-His").
+
+La transacción lógica: 1. Primero insertas el "ticket" global en la tabla Ventas (Folio y Total).
+2. Luego, usas un ciclo foreach para recorrer cada producto que venía en el carrito.
+3. Por cada vuelta del ciclo, haces un INSERT en la tabla Detalle_Venta.
+
+Para tu defensa: Explica que usaste un contador llamado $errores_detalle = 0. Si alguna inserción falla, el contador sube y el servidor le avisa a JavaScript que hubo un problema, evitando generar cobros fantasma.
+
+6. eliminar_producto.php (El "DELETE")
+Propósito: Borrar un registro permanentemente de la base de datos tras la confirmación de SweetAlert.
+
+Lógica: Ejecuta un simple DELETE FROM Productos WHERE Clave_Producto = '$clave'.
+
+Para tu defensa: Si te preguntan "¿Qué pasa con el inventario de ese producto si lo borras?", tu respuesta debe ser: "Gracias a que configuramos las llaves foráneas con la propiedad ON DELETE CASCADE en nuestro script SQL, al borrar el producto, el motor de MySQL borra automáticamente todo el inventario y detalles asociados, manteniendo la base de datos perfectamente limpia y sin registros huérfanos".
