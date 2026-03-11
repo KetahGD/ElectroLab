@@ -1,9 +1,3 @@
-¡Listo, Rolando! Un buen `README.md` es la cara de tu proyecto en GitHub y lo que los profesores ven primero. He diseñado este archivo para que no solo explique qué hace el sistema, sino que resalte explícitamente que cumpliste con todos los puntos técnicos de la rúbrica (los `INNER JOIN`, la API, los fragmentos, etc.).
-
-Copia y pega este contenido en un archivo llamado **`README.md`** en la carpeta raíz de tu proyecto:
-
----
-
 # ⚡ ElectroLab - Sistema de Gestión de Inventario y Ventas
 
 **ElectroLab** es una plataforma web integral diseñada para la administración de una tienda de componentes electrónicos didácticos. El sistema permite gestionar inventarios en múltiples sucursales, administrar productos mediante un CRUD completo y facilitar la experiencia de compra del usuario final.
