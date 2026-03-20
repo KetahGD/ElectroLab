@@ -40,48 +40,6 @@ Para la evaluación académica, el sistema integra:
 
 ---
 
-## 📂 Estructura del Repositorio
-
-```text
-└───Pagina
-    ├───Base de datos       # Scripts SQL (index.sql y datos.sql)
-    ├───Estilos             # Hojas de estilo CSS personalizadas
-    ├───HTML                # Vistas principales (admin, carrito, catalogo, index)
-    ├───img                 # Logotipos y galería de productos
-    ├───JS                  # Controladores AJAX (Sintaxis asíncrona)
-    └───Php                 # Lógica de servidor y conexión a BD
-
-```
-
----
-
-## 🔧 Instalación y Configuración
-
-1. **Clonación:**
-```bash
-git clone https://github.com/TU_USUARIO/ElectroLab.git
-
-```
-
-
-2. **Base de Datos:**
-* Crea una base de datos llamada `ElectroLab`.
-* Importa el archivo `/Base de datos/index.sql` para la estructura.
-* Importa el archivo `/Base de datos/datos.sql` para los datos de prueba.
-
-
-3. **Conexión:**
-* Ajusta las credenciales en `Php/conexion.php` (Server, User, Pass, DB).
-
-
-4. **Acceso:**
-* **Admin:** `24302106@utfv.edu.mx` | Pass: `24302106`
-* **Cliente:** `juan.perez@email.com` | Pass: `cliente123`
-
-
-
----
-
 ## 👨‍💻 Autores
 
 * **Rolando Silva** - *Desarrollo de Software Multiplataforma*
